@@ -2,9 +2,8 @@ LIBRARY	IEEE;
 	USE	IEEE.STD_LOGIC_1164.ALL;
 	USE IEEE.STD_LOGIC_ARITH.ALL;
 	USE	IEEE.STD_LOGIC_UNSIGNED.ALL;
-	use work.FDC_timing.all;
 
-entity X68MiSTer is
+entity X68MiSTerFDC is
 generic(
 	RCFREQ		:integer	:=80;			--SDRAM clock MHz
 	SCFREQ		:integer	:=10000;		--kHz
@@ -19,7 +18,6 @@ port(
 	vidclk	:in std_logic;
 	fdcclk	:in std_logic;
 	sndclk	:in std_logic;
-	emuclk	:in std_logic;
 	plllock	:in std_logic;
 	
 	sysrtc	:in std_logic_vector(64 downto 0);
@@ -67,9 +65,6 @@ port(
    pSd_clk		: out std_logic;
    pSd_cs		: out std_logic;
 
-	pFDSYNC		:in std_logic_Vector(1 downto 0);
-	pFDEJECT		:in std_logic_Vector(1 downto 0);
-	
 --MiSTer diskimage
 	mist_mounted	:in std_logic_vector(3 downto 0);	--SRAM & HDD & FDD1 &FDD0
 	mist_readonly	:in std_logic_vector(3 downto 0);
@@ -89,10 +84,12 @@ port(
 	pDip       : in std_logic_vector( 3 downto 0);     -- 0=ON,  1=OFF(default on shipment)
 	pLed       : out std_logic;
 	pPsw			: in std_logic_vector(1 downto 0);
+	pfdwait	:in std_logic_vector(1 downto 0);
 	
 	pSramld		:in std_logic;
 	pSramst		:in std_logic;
 
+	pTonemode	:in std_logic_vector(1 downto 0);
 	pMidi_in		:in std_logic;
 	pMidi_out	:out std_logic;
 
@@ -109,9 +106,9 @@ port(
 	
 	rstn		:in std_logic
 );
-end X68MiSTer;
+end X68MiSTerFDC;
 
-architecture rtl of X68MiSTer is
+architecture rtl of X68MiSTerFDC is
 
 constant brsize		:integer	:=7;
 constant RAMAWIDTH	:integer	:=25;	--per byte
@@ -280,19 +277,6 @@ signal	bg_PAT		:std_logic_vector(7 downto 0);
 --Disk emu
 signal	dem_rstn	:std_logic;
 signal	dem_initdone	:std_logic;
-signal	dem_fderamaddr	:std_logic_vector(22 downto 0);
-signal	dem_fderamrdat	:std_logic_vector(15 downto 0);
-signal	dem_fderamwdat	:std_logic_vector(15 downto 0);
-signal	dem_fderamwr	:std_logic;
-signal	dem_fecramaddrh	:std_logic_vector(14 downto 0);
-signal	dem_fecramaddrl	:std_logic_vector(7 downto 0);
-signal	dem_fecramwe	:std_logic;
-signal	dem_fecramrdat	:std_logic_vector(15 downto 0);
-signal	dem_fecramwdat	:std_logic_vector(15 downto 0);
-signal	dem_fecramrd	:std_logic;
-signal	dem_fecramwr	:std_logic;
-signal	dem_fdetracklen	:std_logic_vector(13 downto 0);
-signal	dem_fecrambusy	:std_logic;
 -- for FDC
 signal	FDC_cs		:std_logic;
 signal	FDC_csn		:std_logic;
@@ -306,8 +290,6 @@ signal	FDC_INTn	:std_logic;
 signal	FDC_INT		:std_logic;
 signal	FDC_WAIT	:std_logic;
 signal	FD_hmssft	:std_logic;
-signal	FD_int0		:integer range 0 to (BR_300_D*FCFREQ/1000000);
-signal	FD_int1		:integer range 0 to (BR_300_D*FCFREQ/1000000);
 signal	FDC_READYn	:std_logic;
 signal	FDC_READYm	:std_logic;
 signal	FDSREG		:std_logic_vector(15 downto 0);
@@ -315,24 +297,14 @@ signal	FD_DE		:std_logic_vector(1 downto 0);
 signal	FDC_BUSY	:std_logic;
 signal	FDCPY_BUSY	:std_logic;
 signal	FDC_indisk	:std_logic_vector(1 downto 0);
-signal	FDC_wrenn	:std_logic;
-signal	FDC_wrbitn	:std_logic;
-signal	FDC_rdbitn	:std_logic;
-signal	FDC_stepn	:std_logic;
-signal	FDC_sdirn	:std_logic;
-signal	FDC_track0n	:std_logic;
-signal	FDC_indexn	:std_logic;
-signal	FDC_siden	:std_logic;
-signal	FDC_wprotn	:std_logic;
-signal	FDC_USELn	:std_logic_vector(3 downto 0);
-signal	FDC_MOTORn	:std_logic_vector(3 downto 0);
-signal	FDC_MFM		:std_logic;
-signal	FDC_eject	:std_logic_vector(3 downto 0);
-signal	FDD_eject	:std_logic_vector(1 downto 0);
-signal	FDD_indisk	:std_logic_vector(1 downto 0);
-signal	FDD_USELn	:std_logic_vector(1 downto 0);
 signal	FD_USELn	:std_logic_vector(1 downto 0);
 signal	FD_MOTORn	:std_logic_vector(1 downto 0);
+signal	fdc_mfm		:std_logic;
+signal	fdc_sectsize:std_logic_Vector(1 downto 0);
+signal	fdc_fmterr	:std_logic;
+signal	fdc_usel		:std_logic_vector(1 downto 0);
+signal	fdc_eject	:std_logic_Vector(3 downto 0);
+signal	fd_bitsft	:std_logic;
 
 --for SASI
 signal	SASI_CS		:std_logic;
@@ -355,15 +327,6 @@ signal	SASI_IO		:std_logic;
 signal	SASI_CD		:std_logic;
 signal	SASI_MSG	:std_logic;
 signal	SASI_RST	:std_logic;
-
-signal	SASI_SELf	:std_logic;
-signal	SASI_BSYf	:std_logic;
-signal	SASI_REQf	:std_logic;
-signal	SASI_ACKf	:std_logic;
-signal	SASI_IOf	:std_logic;
-signal	SASI_CDf	:std_logic;
-signal	SASI_MSGf	:std_logic;
-signal	SASI_RSTf	:std_logic;
 
 -- IO unit
 signal	IOU_rdat	:std_logic_vector(7 downto 0);
@@ -1095,145 +1058,6 @@ component VLINEBUF
 	);
 END component;
 
-component  FDCs is
-generic(
-	maxtrack	:integer	:=85;
-	maxbwidth	:integer	:=88;
-	preseek		:std_logic	:='0';
-	sysclk		:integer	:=20
-);
-port(
-	RDn		:in std_logic;
-	WRn		:in std_logic;
-	CSn		:in std_logic;
-	A0		:in std_logic;
-	WDAT	:in std_logic_vector(7 downto 0);
-	RDAT	:out std_logic_vector(7 downto 0);
-	DATOE	:out std_logic;
-	DACKn	:in std_logic;
-	DRQ		:out std_logic;
-	TC		:in std_logic;
-	INTn	:out std_logic;
-	WAITIN	:in std_logic	:='0';
-
-	WREN	:out std_logic;		--pin24
-	WRBIT	:out std_logic;		--pin22
-	RDBIT	:in std_logic;		--pin30
-	STEP	:out std_logic;		--pin20
-	SDIR	:out std_logic;		--pin18
-	WPRT	:in std_logic;		--pin28
-	track0	:in std_logic;		--pin26
-	index	:in std_logic;		--pin8
-	side	:out std_logic;		--pin32
-	usel	:out std_logic_vector(1 downto 0);
-	READY	:in std_logic;		--pin34
-	
-	int0	:in integer range 0 to maxbwidth;
-	int1	:in integer range 0 to maxbwidth;
-	int2	:in integer range 0 to maxbwidth;
-	int3	:in integer range 0 to maxbwidth;
-	
-	td0		:in std_logic;
-	td1		:in std_logic;
-	td2		:in std_logic;
-	td3		:in std_logic;
-	
-	hmssft	:in std_logic;		--0.5msec
-	
-	busy	:out std_logic;
-	mfm		:out std_logic;
-	
-	ismode	:in std_logic	:='1';
-	
-	sclk		:in std_logic;
-	fclk		:in std_logic;
-	rstn	:in std_logic
-);
-end component;
-
-component FDtiming
-generic(
-	sysclk	:integer	:=21477		--in kHz
-);
-port(
-	drv0sel		:in std_logic;		--0:300rpm 1:360rpm
-	drv1sel		:in std_logic;
-	drv0sele	:in std_logic;		--1:speed selectable
-	drv1sele	:in std_logic;
-
-	drv0hd		:in std_logic;
-	drv0hdi		:in std_logic;		--IBM 1.44MB format
-	drv1hd		:in std_logic;
-	drv1hdi		:in std_logic;		--IBM 1.44MB format
-	
-	drv0hds		:out std_logic;
-	drv1hds		:out std_logic;
-	
-	drv0int		:out integer range 0 to (BR_300_D*sysclk/1000000);
-	drv1int		:out integer range 0 to (BR_300_D*sysclk/1000000);
-	
-	hmssft		:out std_logic;
-	
-	clk			:in std_logic;
-	rstn		:in std_logic
-);
-end component;
-
-component dc2ry
-generic(
-	delay	:integer	:=100
-);
-port(
-	USEL	:in std_logic_vector(1 downto 0);
-	BUSY	:in std_logic;
-	DSKCHGn	:in std_logic;
-	RDBITn	:in std_logic;
-	INDEXn	:in std_logic;
-	
-	READYn	:out std_logic;
-	READYV	:out std_logic_vector(3 downto 0);
-	
-	clk		:in std_logic;
-	rstn	:in std_logic
-);
-end component;
-
-component dskchk2d
-generic(
-	sysclk	:integer	:=20000;	--system clock(kHz)	20000
-	chkint	:integer	:=300;		--check interval(msec)
-	signwait:integer	:=1;		--signal wait length(usec)
-	datwait	:integer	:=10;		--data wait length(usec)
-	motordly:integer	:=500		--motor rotate delay(msec)	
-);
-port(
-	FDC_USELn	:in std_logic_vector(1 downto 0);
-	FDC_BUSY	:in std_logic;
-	FDC_MOTORn	:in std_logic_vector(1 downto 0);
-	FDC_DIRn	:in std_logic;
-	FDC_STEPn	:in std_logic;
-	FDC_READYn	:out std_logic;
-	FDC_WAIT	:out std_logic;
-	
-	FDD_USELn	:out std_logic_vector(1 downto 0);
-	FDD_MOTORn	:out std_logic_vector(1 downto 0);
-	FDD_DATAn	:in std_logic;
-	FDD_INDEXn	:in std_logic;
-	FDD_DSKCHGn	:in std_logic;
-	FDD_DIRn	:out std_logic;
-	FDD_STEPn	:out std_logic;
-	
-	driveen		:in std_logic_vector(1 downto 0)	:=(others=>'1');
-	f_eject		:in std_logic_vector(1 downto 0)	:=(others=>'0');
-	
-	indisk		:out std_logic_vector(1 downto 0);
-	
-	hmssft		:in std_logic;
-	
-	clk			:in std_logic;
-	rstn		:in std_logic
-);	
-end component;	
 
 component sasisd
 port(
@@ -1294,64 +1118,59 @@ port(
 );
 end component;
 
-component diskemu_mister
+component diskemu_misterFDC
 generic(
-	fclkfreq		:integer	:=30000;
 	sclkfreq		:integer	:=10000;
-	fdwait	:integer	:=10
+	fdc_TCtout		:integer	:=100;
+	fdc_wtrack		:integer	:=7;
+	fdc_wsect	:integer	:=5
 );
 port(
 
 --SASI
 	sasi_din	:in std_logic_vector(7 downto 0)	:=(others=>'0');
-	sasi_dout	:out std_logic_vector(7 downto 0);
+	sasi_dout:out std_logic_vector(7 downto 0);
 	sasi_sel	:in std_logic						:='0';
 	sasi_bsy	:out std_logic;
 	sasi_req	:out std_logic;
 	sasi_ack	:in std_logic						:='0';
-	sasi_io		:out std_logic;
-	sasi_cd		:out std_logic;
+	sasi_io	:out std_logic;
+	sasi_cd	:out std_logic;
 	sasi_msg	:out std_logic;
 	sasi_rst	:in std_logic						:='0';
 
 --FDD
-	fdc_useln	:in std_logic_vector(1 downto 0)	:=(others=>'1');
-	fdc_motorn	:in std_logic_vector(1 downto 0)	:=(others=>'1');
-	fdc_readyn	:out std_logic;
-	fdc_wrenn	:in std_logic						:='1';
-	fdc_wrbitn	:in std_logic						:='1';
-	fdc_rdbitn	:out std_logic;
-	fdc_stepn	:in std_logic						:='1';
-	fdc_sdirn	:in std_logic						:='1';
-	fdc_track0n	:out std_logic;
-	fdc_indexn	:out std_logic;
-	fdc_siden	:in std_logic						:='1';
-	fdc_wprotn	:out std_logic;
-	fdc_eject	:in std_logic_vector(1 downto 0)	:=(others=>'0');
-	fdc_indisk	:out std_logic_vector(1 downto 0)	:=(others=>'0');
-	fdc_trackwid:in std_logic						:='1';	--1:2HD/2DD 0:2D
-	fdc_dencity	:in std_logic						:='1';	--1:2HD 0:2DD/2D
-	fdc_rpm		:in std_logic						:='0';	--1:360rpm 0:300rpm
-	fdc_mfm		:in std_logic						:='1';
+	fdc_tracks	:in std_logic_vector(fdc_wtrack-1 downto 0);
+	fdc_sects	:in std_logic_vector(fdc_wsect-1 downto 0);
 	
---FD emulator
-	fde_tracklen:out std_logic_vector(13 downto 0);
-	fde_ramaddr	:out std_logic_vector(22 downto 0);
-	fde_ramrdat	:in std_logic_vector(15 downto 0);
-	fde_ramwdat	:out std_logic_vector(15 downto 0);
-	fde_ramwr	:out std_logic;
-	fde_ramwait	:in std_logic;
-	fec_ramaddrh :out std_logic_vector(14 downto 0);
-	fec_ramaddrl :in std_logic_vector(7 downto 0);
-	fec_ramwe	:in std_logic;
-	fec_ramrdat	:out std_logic_vector(15 downto 0);
-	fec_ramwdat	:in std_logic_vector(15 downto 0);
-	fec_ramrd	:out std_logic;
-	fec_ramwr	:out std_logic;
-	fec_rambusy	:in std_logic;
+	fdc_RDn		:in std_logic;
+	fdc_WRn		:in std_logic;
+	fdc_CSn		:in std_logic;
+	fdc_A0		:in std_logic;
+	fdc_WDAT	:in std_logic_vector(7 downto 0);
+	fdc_RDAT	:out std_logic_vector(7 downto 0);
+	fdc_DATOE	:out std_logic;
+	fdc_DACKn	:in std_logic;
+	fdc_DRQ		:out std_logic;
+	fdc_TC		:in std_logic;
+	fdc_INTn	:out std_logic;
+	fdc_WAITIN	:in std_logic	:='0';
+	
+	fdc_indisk	:out std_logic_vector(1 downto 0);
+	fdc_usel		:out std_logic_vector(1 downto 0);
+	fdc_mfm		:out std_logic;
+	fdc_sectsize:out std_logic_vector(1 downto 0);
+	fdc_ready	:in std_logic;
+	fdc_hmssft	:in std_logic;
+	fdc_bitsft	:in std_logic;
+	fdc_fmterr	:in std_logic;
+	fdc_eject	:in std_logic_Vector(1 downto 0);
+	fdc_seekwait:in std_logic;
+	fdc_txwait	:in std_logic;
+	fdc_ismode	:in std_logic	:='1';
 
-	fec_fdsync	:in std_logic_Vector(1 downto 0);
-
+	fdc_rxN		:in std_logic_Vector(7 downto 0);
+	
 --SRAM
 	sram_cs		:in std_logic						:='0';
 	sram_addr	:in std_logic_vector(12 downto 0)	:=(others=>'0');
@@ -1364,14 +1183,14 @@ port(
 	sram_ld		:in std_logic;
 	sram_st		:in std_logic;
 
---MiSTer
+--MiSTer diskimage
 	mist_mounted	:in std_logic_vector(3 downto 0);	--SRAM & HDD & FDD1 &FDD0
 	mist_readonly	:in std_logic_vector(3 downto 0);
 	mist_imgsize	:in std_logic_vector(63 downto 0);
 
 	mist_lba		:out std_logic_vector(31 downto 0);
-	mist_rd			:out std_logic_vector(3 downto 0);
-	mist_wr			:out std_logic_vector(3 downto 0);
+	mist_rd		:out std_logic_vector(3 downto 0);
+	mist_wr		:out std_logic_vector(3 downto 0);
 	mist_ack		:in std_logic;
 
 	mist_buffaddr	:in std_logic_vector(8 downto 0);
@@ -1382,10 +1201,9 @@ port(
 --common
 	initdone	:out std_logic;
 	busy		:out std_logic;
-	fclk		:in std_logic;
 	sclk		:in std_logic;
-	rclk		:in std_logic;
-	rstn		:in std_logic
+	prstn		:in std_logic;
+	srstn		:in std_logic
 );
 end component;
 
@@ -1981,6 +1799,7 @@ port(
 --	monout	:out std_logic_vector(15 downto 0);
 
 	chenable:in std_logic_vector(7 downto 0)	:=(others=>'1');
+	tonemode:in std_logic_vector(1 downto 0)	:="00";
 
 	fmclk	:in std_logic;
 	pclk	:in std_logic;
@@ -2637,20 +2456,20 @@ begin
 		g3_caddr	=>g3_caddr,
 		g3_clear	=>g3_clear,
 
-		fde_addr	=>'1' & dem_fderamaddr(22 downto 0),
-		fde_rdat	=>dem_fderamrdat,
-		fde_wdat	=>dem_fderamwdat,
-		fde_wr		=>dem_fderamwr,
-		fde_tlen	=>dem_fdetracklen,
+		fde_addr	=>(others=>'1'),
+		fde_rdat	=>open,
+		fde_wdat	=>(others=>'1'),
+		fde_wr		=>'0',
+		fde_tlen	=>(others=>'0'),
 		
-		fec_addr	=>dem_fecramaddrl,
-		fec_rdat	=>dem_fecramrdat,
-		fec_wdat	=>dem_fecramwdat,
-		fec_we	=>dem_fecramwe,
-		fec_addrh	=>'1' & dem_fecramaddrh(14 downto 0),
-		fec_rd		=>dem_fecramrd,
-		fec_wr		=>dem_fecramwr,
-		fec_busy	=>dem_fecrambusy,
+		fec_addr	=>open,
+		fec_rdat	=>open,
+		fec_wdat	=>(others=>'0'),
+		fec_we	=>open,
+		fec_addrh	=>(others=>'1'),
+		fec_rd		=>'0',
+		fec_wr		=>'0',
+		fec_busy	=>open,
 
 		initdone	=>ram_inidone,
 		sclk		=>sysclk,
@@ -3180,94 +2999,32 @@ begin
 	);
 
 	FD_HDn<=not FD_HD;
-	FDT	:FDtiming generic map(FCFREQ) port map(
-		drv0sel		=>'0',	--0:300rpm 1:360rpm
-		drv1sel		=>'0',
-		drv0sele	=>'0',
-		drv1sele	=>'0',
-	
-		drv0hd		=>FD_HDn,
-		drv0hdi		=>'1',		--IBM 1.44MB format
-		drv1hd		=>FD_HDn,
-		drv1hdi		=>'1',		--IBM 1.44MB format
-		
-		drv0hds		=>open,
-		drv1hds		=>open,
-		
-		drv0int		=>FD_int0,
-		drv1int		=>FD_int1,
-		
-		hmssft		=>FD_hmssft,
-		
-		clk			=>fdcclk,
-		rstn		=>rstn
-	);
 	
 	FDC_DACKn<=not FDC_DACK;
 	FDC_CSn<=not FDC_CS;
-	fd	:fdcs generic map(
-		maxtrack	=>85,
-		maxbwidth	=>(BR_300_D*FCFREQ/1000000),
-		sysclk		=>FCFREQ/1000
-	)
-	port map(
-		RDn		=>b_rdn,
-		WRn		=>b_wrn(0),
-		CSn		=>FDC_CSn,
-		A0		=>abus(1),
-		WDAT	=>dbus(7 downto 0),
-		RDAT	=>FDC_WD,
-		DATOE	=>FDC_OE,
-		DACKn	=>FDC_DACKn,
-		DRQ		=>FDC_DRQ,
-		TC		=>FDC_TC,
-		INTn	=>FDC_INTn,
-		WAITIN	=>FDC_WAIT,
 
-		WREN	=>FDC_wrenn,
-		WRBIT	=>FDC_wrbitn,
-		RDBIT	=>FDC_rdbitn,
-		STEP	=>FDC_stepn,
-		SDIR	=>FDC_sdirn,
-		WPRT	=>FDC_wprotn,
-		track0	=>FDC_track0n,
-		index	=>FDC_indexn,
-		side	=>FDC_siden,
-		usel	=>open,
-		READY	=>FDC_READYm,
-		
-		int0	=>FD_int0,
-		int1	=>FD_int1,
-		int2	=>FD_int0,
-		int3	=>FD_int1,
-	
-		td0		=>'1',
-		td1		=>'1',
-		td2		=>'1',
-		td3		=>'1',
-		
-		hmssft	=>FD_hmssft,
-		
-		busy	=>FDC_BUSY,
-		mfm		=>FDC_MFM,
-		
-		ismode	=>'0',
-		
-		sclk		=>sysclk,
-		fclk		=>fdcclk,
-		rstn	=>srstn
-	);
 
 	FDC_INT<=not FDC_INTn;
 	
-	FDC_USELn<=	--"1111" when FD_MOTOR='0' else
-				"1110" when FD_USEL="00" else
-				"1101" when FD_USEL="01" else
-				"1011" when FD_USEL="10" else
-				"0111" when FD_USEL="11" else
-				"1111";
-	FDC_MOTORn<=not FD_MOTOR & not FD_MOTOR & not FD_MOTOR & not FD_MOTOR;
-	
+	process(FD_MOTOR,fdc_usel,fdc_indisk)begin
+		case fdc_usel is
+		when "00" =>
+			if(fdc_indisk(0)='1')then
+				FDC_READYn<=not FD_MOTOR;
+			else
+				FDC_READYn<='1';
+			end if;
+		when "01" =>
+			if(fdc_indisk(1)='1')then
+				FDC_READYn<=not FD_MOTOR;
+			else
+				FDC_READYn<='1';
+			end if;
+		when others =>
+			FDC_READYn<='1';
+		end case;
+	end process;
+
 	FDC_READYm<=FDC_READYn and (not opm_ct2);
 
 	IOU	:IOcont port map(
@@ -3487,6 +3244,7 @@ begin
 		
 	--	monout	:out std_logic_vector(15 downto 0);
 		chenable	=>dopmonoff,
+		tonemode	=>pTonemode,
 
 		fmclk		=>sndclk,
 		pclk		=>sysclk,
@@ -3679,77 +3437,65 @@ begin
 		ODAT	=>SASI_H2C,
 		ODEN	=>open,
 		SEL		=>SASI_SEL,
-		BSY		=>SASI_BSYf,
-		REQ		=>SASI_REQf,
+		BSY		=>SASI_BSY,
+		REQ		=>SASI_REQ,
 		ACK		=>SASI_ACK,
-		IO		=>SASI_IOf,
-		CD		=>SASI_CDf,
-		MSG		=>SASI_MSGf,
+		IO			=>SASI_IO,
+		CD			=>SASI_CD,
+		MSG		=>SASI_MSG,
 		RST		=>SASI_RST,
 		
 		clk		=>sysclk,
 		rstn	=>srstn
 	);
-	SELf	:digifilter generic map(2,'0') port map(SASI_SEL,SASI_SELf,emuclk,srstn);
-	BSYf	:digifilter generic map(2,'0') port map(SASI_BSY,SASI_BSYf,sysclk,srstn);
-	REQf	:digifilter generic map(2,'0') port map(SASI_REQ,SASI_REQf,sysclk,srstn);
-	ACKf	:digifilter generic map(2,'0') port map(SASI_ACK,SASI_ACKf,emuclk,srstn);
-	IOf		:digifilter generic map(2,'0') port map(SASI_IO,SASI_IOf,sysclk,srstn);
-	CDf		:digifilter generic map(2,'0') port map(SASI_CD,SASI_CDf,sysclk,srstn);
-	MSGf	:digifilter generic map(2,'0') port map(SASI_MSG,SASI_MSGf,sysclk,srstn);
-	RSTf	:digifilter generic map(2,'0') port map(SASI_RST,SASI_RSTf,emuclk,srstn);
+
+	hms	:sftclk generic map(SCFREQ,2,1) port map("1",FD_hmssft,sysclk,srstn);
+	txsft	:sftclk generic map(SCFREQ,62,1) port map("1",FD_bitsft,sysclk,srstn);
 	
-	DISKE	:diskemu_mister generic map(FCFREQ,SCFREQ,10) port map(
+	DISKE	:diskemu_misterFDC generic map(SCFREQ,100,7,5) port map(
 
 	--SASI
 		sasi_din	=>SASI_H2C,
-		sasi_dout	=>SASI_C2H,
-		sasi_sel	=>SASI_SELf,
+		sasi_dout=>SASI_C2H,
+		sasi_sel	=>SASI_SEL,
 		sasi_bsy	=>SASI_BSY,
 		sasi_req	=>SASI_REQ,
-		sasi_ack	=>SASI_ACKf,
-		sasi_io		=>SASI_IO,
-		sasi_cd		=>SASI_CD,
+		sasi_ack	=>SASI_ACK,
+		sasi_io	=>SASI_IO,
+		sasi_cd	=>SASI_CD,
 		sasi_msg	=>SASI_MSG,
-		sasi_rst	=>SASI_RSTf,
+		sasi_rst	=>SASI_RST,
 
 	--FDD
-		fdc_useln	=>FDC_USELn(1 downto 0),
-		fdc_motorn	=>FDC_MOTORn(1 downto 0),
-		fdc_readyn	=>FDC_READYn,
-		fdc_wrenn	=>FDC_wrenn,
-		fdc_wrbitn	=>FDC_wrbitn,
-		fdc_rdbitn	=>FDC_rdbitn,
-		fdc_stepn	=>FDC_stepn,
-		fdc_sdirn	=>FDC_sdirn,
-		fdc_track0n	=>FDC_track0n,
-		fdc_indexn	=>FDC_indexn,
-		fdc_siden	=>FDC_siden,
-		fdc_wprotn	=>FDC_wprotn,
-		fdc_eject	=>FDC_eject(1 downto 0) or pFDEJECT,
+		fdc_tracks	=>"1001101",	--77
+		fdc_sects	=>"01000",		--8
+		fdc_RDn		=>b_rdn,
+		fdc_WRn		=>b_wrn(0),
+		fdc_CSn		=>FDC_CSn,
+		fdc_A0		=>abus(1),
+		fdc_WDAT		=>dbus(7 downto 0),
+		fdc_RDAT		=>FDC_WD,
+		fdc_DATOE	=>FDC_OE,
+		fdc_DACKn	=>FDC_DACKn,
+		fdc_DRQ		=>FDC_DRQ,
+		fdc_TC		=>FDC_TC,
+		fdc_INTn		=>FDC_INTn,
+		fdc_WAITIN	=>FDC_WAIT,
+	
 		fdc_indisk	=>FDC_indisk,
-		fdc_trackwid=>'1',
-		fdc_dencity	=>FD_HDn,
-		fdc_rpm		=>'1',
-		fdc_mfm		=>FDC_MFM,
+		fdc_usel		=>fdc_usel,
+		fdc_mfm		=>fdc_mfm,
+		fdc_sectsize=>fdc_sectsize,
+		fdc_ready	=>not FDC_READYm,
+		fdc_hmssft	=>FD_hmssft,
+		fdc_bitsft	=>FD_bitsft,
+		fdc_fmterr	=>fdc_fmterr,
+		fdc_eject	=>FDC_eject(1 downto 0),
+		fdc_seekwait=>pfdwait(0),
+		fdc_txwait	=>pfdwait(1),
+		fdc_ismode	=>'0',
 		
-	--FD emulator
-		fde_tracklen=>dem_fdetracklen,
-		fde_ramaddr	=>dem_fderamaddr,
-		fde_ramrdat	=>dem_fderamrdat,
-		fde_ramwdat	=>dem_fderamwdat,
-		fde_ramwr	=>dem_fderamwr,
-		fde_ramwait	=>'0',
-		fec_ramaddrh =>dem_fecramaddrh,
-		fec_ramaddrl =>dem_fecramaddrl,
-		fec_ramwe	=>dem_fecramwe,
-		fec_ramrdat	=>dem_fecramwdat,
-		fec_ramwdat	=>dem_fecramrdat,
-		fec_ramrd	=>dem_fecramrd,
-		fec_ramwr	=>dem_fecramwr,
-		fec_rambusy	=>dem_fecrambusy,
-
-		fec_fdsync	=>pFDSYNC,
+		fdc_rxN		=>x"03",
 
 	--SRAM
 		sram_cs		=>nv_ce,
@@ -3781,11 +3527,14 @@ begin
 	--common
 		initdone	=>dem_initdone,
 		busy		=>pLed,
-		fclk		=>fdcclk,
 		sclk		=>sysclk,
-		rclk		=>ramclk,
-		rstn		=>dem_rstn
+		prstn		=>srstn,
+		srstn		=>dem_rstn
 );
+
+	fdc_fmterr<=	'1' when fdc_mfm='0' else
+						'1' when fdc_sectsize/="11" else
+						'0';
 	
 	nv_wren<=	'0' when nvwp/=x"31" else
 				'0' when nv_ce='0' else

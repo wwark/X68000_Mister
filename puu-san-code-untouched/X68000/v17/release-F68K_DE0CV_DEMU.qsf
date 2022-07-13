@@ -467,6 +467,7 @@ set_global_assignment -name VHDL_FILE ../../FDC/mfmmod.vhd
 set_global_assignment -name VHDL_FILE ../../FDC/nrdet.vhd
 set_global_assignment -name VHDL_FILE ../../FDC/dskchk.vhd
 set_global_assignment -name VHDL_FILE ../../FDC/dskchk2d.vhd
+set_global_assignment -name VHDL_FILE ../../FDC/seekcont.vhd
 set_global_assignment -name VHDL_FILE ../FDtiming.vhd
 set_global_assignment -name VHDL_FILE ../../SPI/SPI_IF.vhd
 set_global_assignment -name VHDL_FILE ../SASIIF/sasiif.vhd

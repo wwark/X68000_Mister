@@ -2,7 +2,7 @@ LIBRARY	IEEE;
 USE	IEEE.STD_LOGIC_1164.ALL;
 USE	IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity headseek is
+entity heademu is
 generic(
 	maxtrack	:integer	:=79;
 	maxset		:integer	:=10;
@@ -18,9 +18,7 @@ port(
 	reachtrack	:out std_logic;
 	busy		:out std_logic;
 	
-	track0		:in std_logic;
-	seek		:out std_logic;
-	sdir		:out std_logic;
+	track0n		:out std_logic;
 	
 	init		:in std_logic;
 	seekerr		:out std_logic;
@@ -29,9 +27,9 @@ port(
 	clk			:in std_logic;
 	rstn		:in std_logic
 );
-end headseek;
+end heademu;
 
-architecture rtl of headseek is
+architecture rtl of heademu is
 signal	current	:integer range 0 to maxtrack;
 
 	type state_t is (
@@ -62,9 +60,12 @@ signal	intbusy		:std_logic;
 signal	curdir		:std_logic;
 signal	wsetcount	:integer range 0 to maxset;
 signal	seekerrb	:std_logic;
-
+signal	track0s		:std_logic;
 begin
-
+	
+	track0s<='0' when current=0 else '1';
+	track0n<=track0s;
+	
 	process(clk,rstn)begin
 		if(rstn='0')then
 			current<=0;
@@ -91,14 +92,14 @@ begin
 			case state is
 			when ST_INIIN0 =>
 				if(intbusy='0')then
-					if(track0='0')then
+					if(track0s='0')then
 						if(current<maxtrack)then
 							movedir<='0';
 							move<='1';
 							current<=current+1;
 						else
 							seekerrb<='1';
-							busy<='1';
+							busy<='0';
 							state<=ST_IDLE;
 						end if;
 					else
@@ -119,7 +120,7 @@ begin
 				end if;
 			when ST_INIOUT =>
 				if(intbusy='0')then
-					if(track0='1')then
+					if(track0s='1')then
 						if(current>0)then
 							current<=current-1;
 							movedir<='1';
@@ -187,7 +188,6 @@ begin
 	
 	process(clk,rstn)begin
 		if(rstn='0')then
-			seek<='1';
 			curdir<='0';
 			movestate<=MS_IDLE;
 		elsif(clk' event and clk='1')then
@@ -205,10 +205,8 @@ begin
 				when MS_DIRWAIT =>
 					movestate<=MS_SEEKON;
 				when MS_SEEKON =>
-					seek<='0';
 					movestate<=MS_SEEKOFF;
 				when MS_SEEKOFF =>
-					seek<='1';
 					movestate<=MS_SEEKWAIT;
 				when MS_SEEKWAIT =>
 					movestate<=MS_IDLE;
@@ -223,9 +221,10 @@ begin
 				'1' when movestate/=MS_IDLE else
 				'0';
 
-	sdir<=curdir;
 	curtrack<=current;
 	seekerr<=seekerrb and not (destset or init);
+
+
 	
 end rtl;
 				

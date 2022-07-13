@@ -18,19 +18,49 @@
 		<hex_little_endian>0</hex_little_endian>
 	</hex_block>
 	<hex_block>
-		<hex_filename>H:/FPGA/Zet98/BIOS/ITF.hex</hex_filename>
+		<hex_filename>H:/FPGA/Zet98/BIOS/font3.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>7274496</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/Zet98/BIOS/font2.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>7208960</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/Zet98/BIOS/font1.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>7143424</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/Zet98/BIOS/font0.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>7077888</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/Zet98/BIOS/98DO/biosf8.hex</hex_filename>
 		<hex_addressing>relative</hex_addressing>
 		<hex_offset>6914048</hex_offset>
 		<hex_little_endian>0</hex_little_endian>
 	</hex_block>
 	<hex_block>
-		<hex_filename>H:/FPGA/Zet98/BIOS/BIOS1.hex</hex_filename>
+		<hex_filename>H:/FPGA/Zet98/BIOS/98DO/biosf8.hex</hex_filename>
 		<hex_addressing>relative</hex_addressing>
 		<hex_offset>6881280</hex_offset>
 		<hex_little_endian>0</hex_little_endian>
 	</hex_block>
 	<hex_block>
-		<hex_filename>H:/FPGA/Zet98/BIOS/BIOS0.hex</hex_filename>
+		<hex_filename>H:/FPGA/Zet98/BIOS/98DO/biosf0.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>6848512</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/Zet98/BIOS/98DO/biose8.hex</hex_filename>
 		<hex_addressing>relative</hex_addressing>
 		<hex_offset>6815744</hex_offset>
 		<hex_little_endian>0</hex_little_endian>
@@ -111,6 +141,150 @@
 		<hex_filename>../../PC8801/BIOS/N88.hex</hex_filename>
 		<hex_addressing>relative</hex_addressing>
 		<hex_offset>6291456</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_sys3.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>6225920</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_sys2.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>6160384</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_sys1.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>6094848</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_sys0.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>6029312</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic0.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5767168</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_fnt3.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5439488</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_fnt2.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5373952</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_fnt1.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5308416</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_fnt0.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5242880</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic7.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5177344</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic6.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5111808</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic5.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>5046272</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic4.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4980736</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic3.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4915200</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic2.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4849664</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dic1.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4784128</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos7.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4653056</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos6.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4587520</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos5.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4521984</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos4.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4456448</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos3.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4390912</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos2.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4325376</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos1.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4259840</hex_offset>
+		<hex_little_endian>0</hex_little_endian>
+	</hex_block>
+	<hex_block>
+		<hex_filename>H:/FPGA/TOWNS/BIOS/fmt_dos0.hex</hex_filename>
+		<hex_addressing>relative</hex_addressing>
+		<hex_offset>4194304</hex_offset>
 		<hex_little_endian>0</hex_little_endian>
 	</hex_block>
 	<sof_data>

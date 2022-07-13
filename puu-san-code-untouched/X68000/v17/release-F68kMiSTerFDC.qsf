@@ -1,5 +1,5 @@
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.0.0
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:03:51  MAY 10, 2020"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.1.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "00:58:30  JULY 13, 2022"
 # -------------------------------------------------------------------------- #
 #
 # Copyright (C) 2018  Intel Corporation. All rights reserved.
@@ -27,7 +27,7 @@ set_global_assignment -name PROJECT_CREATION_TIME_DATE "12:03:51  MAY 10, 2020"
 # Notes:
 #
 # 1) The default values for assignments are stored in the file:
-#		release-F68kMiSTer_assignment_defaults.qdf
+#		release-F68kMiSTerFDC_assignment_defaults.qdf
 #    If this file doesn't exist, see file:
 #		assignment_defaults.qdf
 #
@@ -302,11 +302,11 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_*
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to SDRAM_*
 set_global_assignment -name QIP_FILE ../../MiSTer/sys/pll_hdmi/pll_hdmi_0002.qip -library pll_hdmi
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name RAW_BINARY_FILE "output_files/release-F68kMiSTer.rbf"
+set_global_assignment -name RAW_BINARY_FILE "output_files/release-F68kMiSTerFDC.rbf"
 set_global_assignment -name TEXT_FILE ../Doc/readme_MiSTer.txt
 set_global_assignment -name SOURCE_FILE ../BIOS/boot.rom
-set_global_assignment -name SYSTEMVERILOG_FILE ../MiSTer/X68000.sv
-set_global_assignment -name VHDL_FILE ../X68MiSTer.vhd
+set_global_assignment -name SYSTEMVERILOG_FILE ../MiSTer/X68000FDC.sv
+set_global_assignment -name VHDL_FILE ../X68MiSTerFDC.vhd
 set_global_assignment -name VERILOG_FILE build_id.v
 set_global_assignment -name VERILOG_FILE ../../MiSTer/sys/pll_hdmi/pll_hdmi_0002.v -library pll_hdmi
 set_global_assignment -name QIP_FILE ../../MiSTer/sys/sys.qip
@@ -352,9 +352,10 @@ set_global_assignment -name VHDL_FILE ../../sound/adpcm6258/calcadpcm.vhd
 set_global_assignment -name VHDL_FILE ../../sound/OPM/parrmwram.vhd
 set_global_assignment -name VHDL_FILE ../../sound/OPM/OPMsreg.vhd
 set_global_assignment -name VHDL_FILE ../../sound/OPM/OPMcreg.vhd
-set_global_assignment -name VHDL_FILE ../../sound/OPM/KEY2FNUM.vhd
-set_global_assignment -name QIP_FILE ../../sound/OPM/KEY2FNUM.qip
-set_global_assignment -name MIF_FILE ../../sound/OPM/key2fnum.mif
+set_global_assignment -name MIF_FILE ../../sound/OPM/key2fnum_m.mif
+set_global_assignment -name VHDL_FILE ../../sound/OPM/KEY2FNUM_M.vhd
+set_global_assignment -name QIP_FILE ../../sound/OPM/KEY2FNUM_M.qip
+set_global_assignment -name SOURCE_FILE ../../sound/OPM/KEY2FNUM_M.cmp
 set_global_assignment -name VHDL_FILE ../../sound/OPM/OPM.vhd
 set_global_assignment -name VHDL_FILE ../../sound/FMcommon/TLtbl.vhd
 set_global_assignment -name QIP_FILE ../../sound/FMcommon/TLtbl.qip
@@ -413,40 +414,20 @@ set_global_assignment -name VHDL_FILE ../SPRITE/sprregs.vhd
 set_global_assignment -name QIP_FILE ../GPALETTE/gpram.qip
 set_global_assignment -name VHDL_FILE ../GPALETTE/grpal.vhd
 set_global_assignment -name VHDL_FILE ../../PS2IF/PS2IF.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/crctest.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/FDCs.vhd
 set_global_assignment -name VHDL_FILE ../../FDC/FDC_sectinfo.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/FDC_timing.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/fmdem.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/fmmod.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/headseek.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/mfmdem.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/mfmmod.vhd
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../../FDC/crctestr.vwf
-set_global_assignment -name VECTOR_WAVEFORM_FILE ../../FDC/crctest.vwf
-set_global_assignment -name VHDL_FILE ../../FDC/nrdet.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/dskchk.vhd
-set_global_assignment -name VHDL_FILE ../../FDC/dskchk2d.vhd
 set_global_assignment -name VHDL_FILE ../../FDC/seekcont.vhd
-set_global_assignment -name VHDL_FILE ../FDtiming.vhd
 set_global_assignment -name VHDL_FILE ../SASIIF/sasiif.vhd
 set_global_assignment -name HEX_FILE ../../diskemu_mister/sramdefault.hex
 set_global_assignment -name VHDL_FILE ../../diskemu_mister/wrotecont.vhd
-set_global_assignment -name VHDL_FILE ../../diskemu_mister/tracktable.vhd
 set_global_assignment -name VHDL_FILE ../../diskemu_mister/sramram.vhd
 set_global_assignment -name QIP_FILE ../../diskemu_mister/sramram.qip
 set_global_assignment -name SOURCE_FILE ../../diskemu_mister/sramram.cmp
 set_global_assignment -name VHDL_FILE ../../diskemu_mister/sramcont.vhd
-set_global_assignment -name VHDL_FILE ../../diskemu_mister/sectram.vhd
-set_global_assignment -name QIP_FILE ../../diskemu_mister/sectram.qip
-set_global_assignment -name SOURCE_FILE ../../diskemu_mister/sectram.cmp
 set_global_assignment -name VHDL_FILE ../../diskemu_mister/sasidev.vhd
-set_global_assignment -name VHDL_FILE ../../diskemu_mister/mkgapsync.vhd
-set_global_assignment -name VHDL_FILE ../../diskemu_mister/fecbuf.vhd
-set_global_assignment -name QIP_FILE ../../diskemu_mister/fecbuf.qip
-set_global_assignment -name SOURCE_FILE ../../diskemu_mister/fecbuf.cmp
-set_global_assignment -name VHDL_FILE ../../diskemu_mister/FDemu.vhd
-set_global_assignment -name VHDL_FILE ../../diskemu_mister/diskemu_mister.vhd
+set_global_assignment -name VHDL_FILE ../../diskemu_mister/fdc_mister.vhd
+set_global_assignment -name VHDL_FILE ../../diskemu_mister/fdc_calclba.vhd
+set_global_assignment -name VHDL_FILE ../../diskemu_mister/diskemu_misterFDC.vhd
+set_global_assignment -name VHDL_FILE ../../diskemu_mister/heademu.vhd
 set_global_assignment -name VHDL_FILE ../../rtc/rp5c15_MiSTer.vhd
 set_global_assignment -name VHDL_FILE ../../rtc/rtcbody.vhd
 set_global_assignment -name VHDL_FILE ../SCC/scc.vhd
@@ -480,6 +461,7 @@ set_global_assignment -name VHDL_FILE ../cycV/VLINEBUF.vhd
 set_global_assignment -name VHDL_FILE ../cycV/CACHEMEMN.vhd
 set_global_assignment -name VHDL_FILE ../cycV/CACHEMEMWN.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/addsat.vhd
+set_global_assignment -name VHDL_FILE ../../LIB/dpssram.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/iir.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/g_srff.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/HEX2SEG.vhd

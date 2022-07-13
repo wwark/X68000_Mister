@@ -51,6 +51,7 @@ module emu
 	output        VGA_DE,    // = ~(VBlank | HBlank)
 	output        VGA_F1,
 	output [1:0]  VGA_SL,
+	output        VGA_SCALER, // Force VGA scaler
 
 	output        LED_USER,  // 1 - ON, 0 - OFF.
 
@@ -65,6 +66,7 @@ module emu
 	// b[0]: osd button
 	output  [1:0] BUTTONS,
 
+	input         CLK_AUDIO, // 24.576 MHz
 	output [15:0] AUDIO_L,
 	output [15:0] AUDIO_R,
 	output        AUDIO_S, // 1 - signed audio samples, 0 - unsigned
@@ -130,6 +132,7 @@ assign USER_OUT  = '1;
 assign AUDIO_MIX = 0;
 assign VGA_SL    = 0;
 assign VGA_F1    = 0;
+assign VGA_SCALER = 0;
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {DDRAM_CLK, DDRAM_BURSTCNT, DDRAM_ADDR, DDRAM_DIN, DDRAM_BE, DDRAM_RD, DDRAM_WE} = 0;
 
@@ -147,31 +150,27 @@ parameter CONF_STR = {
 	"-;",
 	"O1,Aspect ratio,4:3,16:9;",
 	"-;",
-	"R6,Reset;",
-	"R7,NMI;",
+	"R0,Reset;",
+	"R2,NMI;",
 	"-;",
-	"R8,Power;",
+	"R3,Power;",
 	"-;",
-	"S0,D88,FDD0;",
-	"S1,D88,FDD1;",
+	"S0,XDF,FDD0;",
+	"S1,XDF,FDD1;",
 	"S2,HDF,SASI;",
 	"S3,RAM,SRAM;",
 	"-;",
-	"R9,SYNC FD0;",
-	"RA,SYNC FD1;",
-	"-;",
-	"RB,EJECT FD0;",
-	"RC,EJECT FD1;",
-	"-;",
-	"RD,LOAD SRAM;",
-	"RE,STORE SRAM;",
+	"R8,LOAD SRAM;",
+	"R9,STORE SRAM;",
+	"OAB,Tone mode,equal,pythagorean,just c major,just a minor;",
+	"O45,FDD wait,disble,seek,data,seek+data;",
 	"J,Fire 1,Fire 2;",
 	"V,v",`BUILD_DATE
 };
 
 /////////////////  CLOCKS  ////////////////////////
 
-wire clk_ram, clk_sys, clk_vid, clk_fdd, clk_snd, clk_emu;
+wire clk_ram, clk_sys, clk_vid, clk_fdd, clk_snd;
 wire pll_locked;
 
 pll pll
@@ -183,7 +182,6 @@ pll pll
 	.outclk_2(clk_vid),
 	.outclk_3(clk_fdd),
 	.outclk_4(clk_snd),
-	.outclk_5(clk_emu),
 	.locked(pll_locked)
 );
 
@@ -314,31 +312,30 @@ always @(posedge clk_sys) begin
 	if(~old_download & ioctl_download) reset_n <= 1;
 end
 
-wire reset = buttons[1] | status[6];
+wire reset = buttons[1] | status[0];
 ///////////////////////////////////////////////////
 
 
-wire NMI = status[7];
-wire POWER = status[8];
-wire [1:0] fdsync = status[10:9];
-wire [1:0] fdeject = status[12:11];
-wire sramld	= status[13];
-wire sramst = status[14];
-wire pdip = status[19:16];
+wire NMI = status[2];
+wire POWER = status[3];
+wire sramld	= status[8];
+wire sramst = status[9];
+wire [4:0]pdip = status[16:12];
+wire [1:0]tonemode = status[11:10];
+wire [1:0]fddwait = status[5:4];
 
 assign CLK_VIDEO = clk_vid;
 assign AUDIO_S = 1;
 
 wire disk_led;
 
-X68MiSTer X68K_top
+X68MiSTerFDC X68K_top
 (
 	.ramclk(clk_ram),
 	.sysclk(clk_sys),
 	.vidclk(clk_vid),
 	.fdcclk(clk_fdd),
 	.sndclk(clk_snd),
-	.emuclk(clk_emu),
 	.plllock(pll_locked),
 	
 	.sysrtc(sysrtc),
@@ -394,14 +391,14 @@ X68MiSTer X68K_top
 	.pSd_clk(SD_SCK),
 	.pSd_cs(SD_CS),
 
-	.pFDSYNC(fdsync),
-	.pFDEJECT(fdeject),
-
 	.pLed(disk_led),
 	.pDip(pdip),
 	.pPsw({~NMI,~POWER}),
 	.pSramld(sramld),
 	.pSramst(sramst),
+	
+	.pTonemode(tonemode),
+	.pfdwait(fddwait),
 
 	.pVideoR(VGA_R),
 	.pVideoG(VGA_G),
