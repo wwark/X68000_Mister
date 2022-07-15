@@ -40,7 +40,8 @@ Start Compilationにてコンパイルを行ってください。
 .rbfファイルはMiSTerに準拠するようにファイル名を「X68000_YYYYMMDD.rbf」に修正し、MiSTerのSDカードルートディレクトリに
 コピーしてください。(YYYYMMDDは本日の日付)
 BIOSイメージはSDカードからロードします。
-CGROMとIPLROMを、この順番でマージしたものを/X68000/boot.romとしてMiSTer用SDカードに保存してください。
+CGROMと128kBの空白、IPLROMを、この順番でマージしたものを/X68000/boot.romとしてMiSTer用SDカードに保存してください。
+CGROM+IPLROM+IPLROMでも構いません。
 
 how to use:
 This RTL is mainly developed in the QuartusII web edition development environment of Altera,

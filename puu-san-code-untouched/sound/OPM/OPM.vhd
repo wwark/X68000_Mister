@@ -25,6 +25,7 @@ port(
 	CT2		:out std_logic;
 	
 	chenable:in std_logic_vector(7 downto 0)	:=(others=>'1');
+	tonemode:in std_logic_vector(1 downto 0)	:="00";
 	monout	:out std_logic_vector(15 downto 0);
 	op0out	:out std_logic_vector(15 downto 0);
 	op1out	:out std_logic_vector(15 downto 0);
@@ -83,10 +84,10 @@ port(
 );
 end component;
 
-component KEY2FNUM
+component KEY2FNUM_M
 	PORT
 	(
-		address		: IN STD_LOGIC_VECTOR (9 DOWNTO 0);
+		address		: IN STD_LOGIC_VECTOR (11 DOWNTO 0);
 		clock		: IN STD_LOGIC  := '1';
 		q		: OUT STD_LOGIC_VECTOR (11 DOWNTO 0)
 	);
@@ -94,7 +95,7 @@ END component;
 
 component envcont
 generic(
-	totalwidth	:integer	:=20
+	totalwidth	:integer	:=28
 );
 port(
 	KEY		:in std_logic;
@@ -103,6 +104,7 @@ port(
 	SLlevel	:in std_logic_vector(15 downto 0);
 	RR		:in std_logic_vector(3 downto 0);
 	SR		:in std_logic_vector(4 downto 0);
+	RKS		:in std_logic_vector(4 downto 0);
 	
 	CURSTATE	:in envstate_t;
 	NXTSTATE	:out envstate_t;
@@ -232,7 +234,7 @@ signal	fmsft		:std_logic;
 signal	thitard,thitawd
 					:std_logic_vector(15 downto 0);
 signal	thitawr			:std_logic;
-signal	elevrd,elevwd	:std_logic_vector(19 downto 0);
+signal	elevrd,elevwd	:std_logic_vector(27 downto 0);
 signal	elevwr			:std_logic;
 signal	sin1a,sin2a,sin3a
 					:std_logic_vector(15 downto 0);
@@ -284,6 +286,8 @@ signal	FdBck	:std_logic_vector(2 downto 0);
 signal	KC		:std_logic_vector(6 downto 0);
 signal	KF		:std_logic_vector(5 downto 0);
 signal	Blk		:std_logic_vector(2 downto 0);
+signal	KCd		:std_logic_vector(4 downto 0);
+signal	RKS		:std_logic_vector(4 downto 0);
 signal	Fnum	:std_logic_vector(11 downto 0);
 signal	Note	:std_logic_vector(1 downto 0);
 signal	Mult	:std_logic_vector(3 downto 0);
@@ -308,7 +312,6 @@ signal	SR		:std_logic_vector(4 downto 0);
 signal	SLEV	:std_logic_vector(15 downto 0);
 signal	TL		:std_logic_vector(6 downto 0);
 signal	AMSE	:std_logic;
-signal	envcalc	:std_logic;
 signal	TLaddr	:std_logic_vector(6 downto 0);
 signal	TLval	:std_logic_vector(15 downto 0);
 signal	TLlevel	:std_logic_vector(15 downto 0);
@@ -500,7 +503,13 @@ begin
 	RR<=	S5RDAT(3 downto 0);
 
 	Blk<=KC(6 downto 4);
-	K2F	:KEY2FNUM port map(KC(3 downto 0) & KF,fmclk,Fnum);
+	KCd<=KC(6 downto 2);
+	K2F	:KEY2FNUM_M port map(tonemode & KC(3 downto 0) & KF,fmclk,Fnum);
+	RKS<=	KCd						when KS="11" else
+			'0' &KCd(4 downto 1)	when KS="10" else
+			"00" & KCd(4 downto 2)	when KS="01" else
+			"000" & KCd(4 downto 3)	when KS="00" else
+			KCd;
 	
 	BUSY<=BUSYC or BUSYS or BUSYR;
 	
@@ -557,7 +566,7 @@ begin
 	end process;
 	
 	thitareg	:fmparram generic map(8,4,16) port map(CHANNELNO,SLOTNO,thitawd,thitawr,fmclk,CHANNELNO,SLOTNO,thitard,fmclk);
-	elevreg		:fmparram generic map(8,4,20) port map(CHANNELNO,SLOTNO,elevwd,elevwr,fmclk,CHANNELNO,SLOTNO,elevrd,fmclk);
+	elevreg		:fmparram generic map(8,4,28) port map(CHANNELNO,SLOTNO,elevwd,elevwr,fmclk,CHANNELNO,SLOTNO,elevrd,fmclk);
 	
 	process(fmclk,rstn)
 	variable vthita	:std_logic_vector(15 downto 0);
@@ -572,7 +581,6 @@ begin
 			TACOUNT<=(others=>'0');
 			TBCOUNT<=(others=>'0');
 			FLAG<=(others=>'0');
-			envcalc<='0';
 			thitawd<=(others=>'0');
 			thitawr<='0';
 			elevwr<='0';
@@ -589,7 +597,6 @@ begin
 				thitawr<='0';
 				elevwr<='0';
 				intend<='0';
-				envcalc<='0';
 				if(TARST='1')then
 					FLAG(0)<='0';
 				end if;
@@ -733,14 +740,14 @@ begin
 								coutc:=add1234;
 							when others=>
 							end case;
-							op0out<=toutx0;
-							op1out<=toutx1;
-							op2out<=toutx2;
-							op3out<=toutx3;
 							case CHANNELNO is
 							when 0 =>
 								sndadd01<=(others=>'0');
 								sndadd11<=(others=>'0');
+								op0out<=toutx0;
+								op1out<=toutx1;
+								op2out<=toutx2;
+								op3out<=toutx3;
 							when others =>
 								sndadd01<=SUM0;
 								sndadd11<=SUM1;
@@ -833,13 +840,14 @@ begin
 			
 	keyc<=	key(CHANNELNO)(SLOTNO);
 
-	env	:envcont generic map(20) port map(
+	env	:envcont generic map(28) port map(
 		KEY		=>keyc,
 		AR		=>AR,
 		DR		=>DR,
 		SLlevel	=>SLlevel,
 		RR		=>RR,
 		SR		=>SR,
+		RKS		=>RKS,
 		
 		CURSTATE	=>cenvst,
 		NXTSTATE	=>nenvst,
@@ -853,7 +861,7 @@ begin
 	
 	TLC	:TLtbl port map(TLaddr,fmclk,TLval);
 	envm	:muls16xu16 port map(sinthita,TLlevel,envsin,fmclk);
-	tlm	:muls16xu16 port map(envsin,elevwd(19 downto 4),toutc,fmclk);
+	tlm	:muls16xu16 port map(envsin,elevwd(27 downto 12),toutc,fmclk);
 	monout<=TLlevel;
 	
 	process(fmclk,rstn)begin

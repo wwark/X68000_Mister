@@ -19,7 +19,6 @@ port(
 	vidclk	:in std_logic;
 	fdcclk	:in std_logic;
 	sndclk	:in std_logic;
-	emuclk	:in std_logic;
 	plllock	:in std_logic;
 	
 	sysrtc	:in std_logic_vector(64 downto 0);
@@ -89,10 +88,12 @@ port(
 	pDip       : in std_logic_vector( 3 downto 0);     -- 0=ON,  1=OFF(default on shipment)
 	pLed       : out std_logic;
 	pPsw			: in std_logic_vector(1 downto 0);
+	pkbdtype	:in std_logic_vector(1 downto 0);
 	
 	pSramld		:in std_logic;
 	pSramst		:in std_logic;
 
+	pTonemode	:in std_logic_vector(1 downto 0);
 	pMidi_in		:in std_logic;
 	pMidi_out	:out std_logic;
 
@@ -355,15 +356,6 @@ signal	SASI_IO		:std_logic;
 signal	SASI_CD		:std_logic;
 signal	SASI_MSG	:std_logic;
 signal	SASI_RST	:std_logic;
-
-signal	SASI_SELf	:std_logic;
-signal	SASI_BSYf	:std_logic;
-signal	SASI_REQf	:std_logic;
-signal	SASI_ACKf	:std_logic;
-signal	SASI_IOf	:std_logic;
-signal	SASI_CDf	:std_logic;
-signal	SASI_MSGf	:std_logic;
-signal	SASI_RSTf	:std_logic;
 
 -- IO unit
 signal	IOU_rdat	:std_logic_vector(7 downto 0);
@@ -1823,6 +1815,8 @@ port(
 	INTack	:in std_logic;
 	IVack	:in std_logic_vector(7 downto 0);
 	
+	kbdtype	:in std_logic_vector(1 downto 0);
+	
 	clk		:in std_logic;
 	rstn	:in std_logic
 );
@@ -1981,6 +1975,7 @@ port(
 --	monout	:out std_logic_vector(15 downto 0);
 
 	chenable:in std_logic_vector(7 downto 0)	:=(others=>'1');
+	tonemode:in std_logic_vector(1 downto 0)	:="00";
 
 	fmclk	:in std_logic;
 	pclk	:in std_logic;
@@ -3430,6 +3425,8 @@ begin
 		INTack	=>IACK6,
 		IVack	=>mfp_ivack,
 			
+		kbdtype	=>pkbdtype,
+
 		clk		=>sysclk,
 		rstn	=>srstn
 	);
@@ -3487,6 +3484,7 @@ begin
 		
 	--	monout	:out std_logic_vector(15 downto 0);
 		chenable	=>dopmonoff,
+		tonemode	=>pTonemode,
 
 		fmclk		=>sndclk,
 		pclk		=>sysclk,
@@ -3679,39 +3677,32 @@ begin
 		ODAT	=>SASI_H2C,
 		ODEN	=>open,
 		SEL		=>SASI_SEL,
-		BSY		=>SASI_BSYf,
-		REQ		=>SASI_REQf,
+		BSY		=>SASI_BSY,
+		REQ		=>SASI_REQ,
 		ACK		=>SASI_ACK,
-		IO		=>SASI_IOf,
-		CD		=>SASI_CDf,
-		MSG		=>SASI_MSGf,
+		IO			=>SASI_IO,
+		CD			=>SASI_CD,
+		MSG		=>SASI_MSG,
 		RST		=>SASI_RST,
 		
 		clk		=>sysclk,
 		rstn	=>srstn
 	);
-	SELf	:digifilter generic map(2,'0') port map(SASI_SEL,SASI_SELf,emuclk,srstn);
-	BSYf	:digifilter generic map(2,'0') port map(SASI_BSY,SASI_BSYf,sysclk,srstn);
-	REQf	:digifilter generic map(2,'0') port map(SASI_REQ,SASI_REQf,sysclk,srstn);
-	ACKf	:digifilter generic map(2,'0') port map(SASI_ACK,SASI_ACKf,emuclk,srstn);
-	IOf		:digifilter generic map(2,'0') port map(SASI_IO,SASI_IOf,sysclk,srstn);
-	CDf		:digifilter generic map(2,'0') port map(SASI_CD,SASI_CDf,sysclk,srstn);
-	MSGf	:digifilter generic map(2,'0') port map(SASI_MSG,SASI_MSGf,sysclk,srstn);
-	RSTf	:digifilter generic map(2,'0') port map(SASI_RST,SASI_RSTf,emuclk,srstn);
+
 	
 	DISKE	:diskemu_mister generic map(FCFREQ,SCFREQ,10) port map(
 
 	--SASI
 		sasi_din	=>SASI_H2C,
-		sasi_dout	=>SASI_C2H,
-		sasi_sel	=>SASI_SELf,
+		sasi_dout=>SASI_C2H,
+		sasi_sel	=>SASI_SEL,
 		sasi_bsy	=>SASI_BSY,
 		sasi_req	=>SASI_REQ,
-		sasi_ack	=>SASI_ACKf,
-		sasi_io		=>SASI_IO,
-		sasi_cd		=>SASI_CD,
+		sasi_ack	=>SASI_ACK,
+		sasi_io	=>SASI_IO,
+		sasi_cd	=>SASI_CD,
 		sasi_msg	=>SASI_MSG,
-		sasi_rst	=>SASI_RSTf,
+		sasi_rst	=>SASI_RST,
 
 	--FDD
 		fdc_useln	=>FDC_USELn(1 downto 0),

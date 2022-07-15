@@ -1006,7 +1006,7 @@ begin
 						img_unit<='1';
 					when others=>
 					end case;
-					img_addr<=haddr+x"08";
+					img_addr<=haddr+x"06";
 					img_rd<='1';
 					fdstate<=fs_loadsheadw;
 				when fs_loadsheadw =>

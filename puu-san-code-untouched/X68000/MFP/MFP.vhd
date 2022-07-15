@@ -69,6 +69,8 @@ port(
 	INTack	:in std_logic;
 	IVack	:in std_logic_vector(7 downto 0);
 	
+	kbdtype	:in std_logic_vector(1 downto 0)	:="00";
+	
 	clk		:in std_logic;
 	rstn	:in std_logic
 );
@@ -356,6 +358,7 @@ port(
 	kbrx	:out std_logic;
 
 	LED		:out std_logic_vector(6 downto 0);
+	kbdtype	:in std_logic_vector(1 downto 0)	:="00";
 	
 	clk		:in std_logic;
 	rstn	:in std_logic
@@ -542,6 +545,7 @@ begin
 		kbrx	=>kbrx,
 
 		LED		=>KBLED,
+		kbdtype	=>kbdtype,
 		
 		clk		=>clk,
 		rstn	=>rstn
