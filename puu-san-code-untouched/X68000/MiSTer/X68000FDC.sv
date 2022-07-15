@@ -164,6 +164,7 @@ parameter CONF_STR = {
 	"R9,STORE SRAM;",
 	"OAB,Tone mode,equal,pythagorean,just c major,just a minor;",
 	"O45,FDD wait,disble,seek,data,seek+data;",
+	"O67,KBD layout,JP Func.,JP Pos.,US Std,US Alt;",
 	"J,Fire 1,Fire 2;",
 	"V,v",`BUILD_DATE
 };
@@ -323,6 +324,7 @@ wire sramst = status[9];
 wire [4:0]pdip = status[16:12];
 wire [1:0]tonemode = status[11:10];
 wire [1:0]fddwait = status[5:4];
+wire [1:0]kbdtype = status[7:6];
 
 assign CLK_VIDEO = clk_vid;
 assign AUDIO_S = 1;
@@ -394,11 +396,13 @@ X68MiSTerFDC X68K_top
 	.pLed(disk_led),
 	.pDip(pdip),
 	.pPsw({~NMI,~POWER}),
+		
 	.pSramld(sramld),
 	.pSramst(sramst),
 	
 	.pTonemode(tonemode),
 	.pfdwait(fddwait),
+	.pkbdtype(kbdtype),
 
 	.pVideoR(VGA_R),
 	.pVideoG(VGA_G),

@@ -302,6 +302,7 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_*
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to SDRAM_*
 set_global_assignment -name QIP_FILE ../../MiSTer/sys/pll_hdmi/pll_hdmi_0002.qip -library pll_hdmi
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name SOURCE_FILE ../Doc/keymap.xlsx
 set_global_assignment -name RAW_BINARY_FILE "output_files/release-F68kMiSTerFDC.rbf"
 set_global_assignment -name TEXT_FILE ../Doc/readme_MiSTer.txt
 set_global_assignment -name SOURCE_FILE ../BIOS/boot.rom
@@ -484,5 +485,7 @@ set_global_assignment -name VHDL_FILE ../../LIB/clktx.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/datfifo.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/datlatch.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/e8255.vhd
+set_global_assignment -name QIP_FILE ../MFP/KBIF/ktble0_m.qip
+set_global_assignment -name QIP_FILE ../MFP/KBIF/ktbln_m.qip
 set_global_assignment -name SEARCH_PATH "h:\\fpga\\mister\\sys\\pll_cfg"
 set_global_assignment -name SEARCH_PATH "h:\\fpga\\mister\\sys"

@@ -85,6 +85,7 @@ port(
 	pLed       : out std_logic;
 	pPsw			: in std_logic_vector(1 downto 0);
 	pfdwait	:in std_logic_vector(1 downto 0);
+	pkbdtype	:in std_logic_vector(1 downto 0);
 	
 	pSramld		:in std_logic;
 	pSramst		:in std_logic;
@@ -1641,6 +1642,8 @@ port(
 	INTack	:in std_logic;
 	IVack	:in std_logic_vector(7 downto 0);
 	
+	kbdtype	:in std_logic_vector(1 downto 0);
+	
 	clk		:in std_logic;
 	rstn	:in std_logic
 );
@@ -3186,7 +3189,9 @@ begin
 		IVECT	=>IVECT6,
 		INTack	=>IACK6,
 		IVack	=>mfp_ivack,
-			
+
+		kbdtype	=>pkbdtype,
+		
 		clk		=>sysclk,
 		rstn	=>srstn
 	);
