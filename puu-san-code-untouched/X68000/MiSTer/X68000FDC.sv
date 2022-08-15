@@ -331,7 +331,7 @@ assign AUDIO_S = 1;
 
 wire disk_led;
 
-X68MiSTerFDC X68K_top
+X68MiSTerFDC #(.DEBUG("00000000"))X68K_top
 (
 	.ramclk(clk_ram),
 	.sysclk(clk_sys),

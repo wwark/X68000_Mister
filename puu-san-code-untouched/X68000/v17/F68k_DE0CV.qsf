@@ -595,8 +595,9 @@ set_global_assignment -name QIP_FILE ../../sound/FMcommon/TLtbl.qip
 set_global_assignment -name VHDL_FILE ../../sound/FMcommon/envcont.vhd
 set_global_assignment -name VHDL_FILE ../../LIB/addsat.vhd
 set_global_assignment -name VHDL_FILE ../../sound/FMcommon/fmparram.vhd
-set_global_assignment -name VHDL_FILE ../../sound/OPM/KEY2FNUM.vhd
-set_global_assignment -name QIP_FILE ../../sound/OPM/KEY2FNUM.qip
+set_global_assignment -name VHDL_FILE ../../sound/OPM/KEY2FNUM_M.vhd
+set_global_assignment -name QIP_FILE ../../sound/OPM/KEY2FNUM_M.qip
+set_global_assignment -name SOURCE_FILE ../../sound/OPM/KEY2FNUM_M.cmp
 set_global_assignment -name VHDL_FILE ../../sound/OPM/OPMsreg.vhd
 set_global_assignment -name VHDL_FILE ../../sound/OPM/OPMcreg.vhd
 set_global_assignment -name VHDL_FILE ../cycV/CACHEMEMWN.vhd
@@ -630,11 +631,13 @@ set_global_assignment -name VHDL_FILE ../cereg.vhd
 set_global_assignment -name VHDL_FILE ../INTcont.vhd
 set_global_assignment -name VHDL_FILE ../MFP/MFP.vhd
 set_global_assignment -name VHDL_FILE ../MFP/GPIP.vhd
+set_global_assignment -name VHDL_FILE ../MFP/KBIF/ktbln_m.vhd
+set_global_assignment -name QIP_FILE ../MFP/KBIF/ktbln_m.qip
+set_global_assignment -name SOURCE_FILE ../MFP/KBIF/ktbln_m.cmp
+set_global_assignment -name VHDL_FILE ../MFP/KBIF/ktble0_m.vhd
+set_global_assignment -name QIP_FILE ../MFP/KBIF/ktble0_m.qip
+set_global_assignment -name SOURCE_FILE ../MFP/KBIF/ktble0_m.cmp
 set_global_assignment -name VHDL_FILE ../MFP/KBIF/KBCONV.vhd
-set_global_assignment -name SOURCE_FILE ../MFP/KBIF/ktble0.cmp
-set_global_assignment -name VHDL_FILE ../MFP/KBIF/ktble0.vhd
-set_global_assignment -name SOURCE_FILE ../MFP/KBIF/ktbln.cmp
-set_global_assignment -name VHDL_FILE ../MFP/KBIF/ktbln.vhd
 set_global_assignment -name VHDL_FILE ../MFP/MFPint.vhd
 set_global_assignment -name VHDL_FILE ../MFP/MFPtimer.vhd
 set_global_assignment -name VHDL_FILE ../MFP/MFPtimerS.vhd
@@ -688,6 +691,7 @@ set_global_assignment -name VECTOR_WAVEFORM_FILE ../../FDC/crctestr.vwf
 set_global_assignment -name VECTOR_WAVEFORM_FILE ../../FDC/crctest.vwf
 set_global_assignment -name VHDL_FILE ../../FDC/nrdet.vhd
 set_global_assignment -name VHDL_FILE ../../FDC/dskchk.vhd
+set_global_assignment -name VHDL_FILE ../../FDC/seekcont.vhd
 set_global_assignment -name VHDL_FILE ../FDtiming.vhd
 set_global_assignment -name VHDL_FILE ../../SPI/SPI_IF.vhd
 set_global_assignment -name VHDL_FILE ../SASIIF/sasiif.vhd
