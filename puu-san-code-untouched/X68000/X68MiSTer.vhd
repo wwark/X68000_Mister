@@ -11,7 +11,7 @@ generic(
 	FCFREQ		:integer	:=30000;		--FDC clock
 	ACFREQ		:integer	:=32000;		--Audio clock
 	DACFREQ		:integer	:=16000;		--Audio DAC freq
-	DEBUG			:std_logic_vector(7 downto 0)	:="00110010"	--nop,SPRBGONOFF,OPMCH_ONOFF,PAUSE_ONOFF,GRP_ONOFF,SCR_ONOFF,ADPCM_ONOFF,CYCLERESET
+	DEBUG			:std_logic_vector(7 downto 0)	:="00000000"	--nop,SPRBGONOFF,OPMCH_ONOFF,PAUSE_ONOFF,GRP_ONOFF,SCR_ONOFF,ADPCM_ONOFF,CYCLERESET
 );
 port(
 	ramclk	:in std_logic;
@@ -565,7 +565,6 @@ signal	pcm_clkdiv	:std_logic_vector(1 downto 0);
 --Sound DAC
 signal	mix_sndL,mix_sndR	:std_logic_vector(15 downto 0);
 signal	sndL,sndR	:std_logic_vector(15 downto 0);
-signal	dacsft		:std_logic;
 
 --for I2C I/F
 signal	SDAIN,SDAOUT	:std_logic;
@@ -3520,8 +3519,8 @@ begin
 		rstn		=>srstn
 	);
 	
-	pcm_sndL<=(pcm_snd(11) & pcm_snd(11) & pcm_snd & "00") when pcm_enL='1' else (others=>'0');
-	pcm_sndR<=(pcm_snd(11) & pcm_snd(11) & pcm_snd & "00") when pcm_enR='1' else (others=>'0');
+	pcm_sndL<=(pcm_snd(11) & pcm_snd & "000") when pcm_enL='1' else (others=>'0');
+	pcm_sndR<=(pcm_snd(11) & pcm_snd & "000") when pcm_enR='1' else (others=>'0');
 	
 	process(sndclk,srstn)
 	variable	sclk	:std_logic;
@@ -3553,32 +3552,16 @@ begin
 	mixL	:addsat generic map(16) port map(opm_sndL(15) & opm_sndL(15 downto 1),pcm_sndL,mix_sndL,open,open);
 	mixR	:addsat generic map(16) port map(opm_sndR(15) & opm_sndR(15 downto 1),pcm_sndR,mix_sndR,open,open);
 
-	dacs	:sftclk generic map(ACFREQ,DACFREQ,1) port map("1",dacsft,sndclk,srstn);
-	
-	sndL<=mix_sndL;
-
-	sndR<=mix_sndR;
+	process(sndclk)begin
+		if(sndclk' event and sndclk='1')then
+			sndL<=mix_sndL;
+			sndR<=mix_sndR;
+		end if;
+	end process;
 	
 	pSndL<=sndL;
 	pSndR<=sndR;
 	
-	DacL	:deltasigmadac generic map(16) port map(
-		data	=>(not sndL(15)) & sndL(14 downto 0),
-		datum	=>open,
-		
-		sft	=>dacsft,
-		clk	=>sndclk,
-		rstn	=>srstn
-	);
-	DacR	:deltasigmadac generic map(16) port map(
-		data	=>(not sndR(15)) & sndR(14 downto 0),
-		datum	=>open,
-		
-		sft	=>dacsft,
-		clk	=>sndclk,
-		rstn	=>srstn
-	);
-
 --opm_doe<='1' when opm_cen='0' and b_rdn='1' else '0';
 	
 	pPs2Clkout<=kb_clkout;

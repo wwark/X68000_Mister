@@ -632,7 +632,7 @@ begin
 				case STATE is
 				when ST_IDLE =>
 					if(CHactive='1')then
-						drqeclr<='1';
+--						drqeclr<='1';
 						CONTMODE<='0';
 						if(OCR_CHAIN(1)='1')then
 							busreq<='1';

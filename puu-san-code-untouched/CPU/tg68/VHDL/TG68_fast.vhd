@@ -792,7 +792,7 @@ process (clk, reset, opcode, TG68_PC, TG68_PC_dec, TG68_PC_br8, TG68_PC_brw, PC_
 				IF fetchOPC='1' THEN
 					trap_interrupt <= '0';
 					IF (test_IPL='1' AND (Flags(10 downto 8)<IPL_nr OR IPL_nr="111")) OR to_SR='1' THEN
---					IF (test_IPL='1' AND (Flags(10 downto 8)<IPL_nr OR IPL_nr="111")) OR to_SR='1' OR opcode(15 downto 6)="0100111011" THEN  --nur für Validator
+--					IF (test_IPL='1' AND (Flags(10 downto 8)<IPL_nr OR IPL_nr="111")) OR to_SR='1' OR opcode(15 downto 6)="0100111011" THEN  --nur fï¿½r Validator
 						opcode <= X"60FE"; 
 						IF to_SR='0' THEN
 							test_delay <= "001";
@@ -864,9 +864,9 @@ PROCESS (clk, reset, opcode)
 				
 				IF writePC_add='1' THEN
 					data_write_tmp <= TG68_PC_add;
-				ELSIF writePC='1' OR fetchOPC='1' OR interrupt='1' OR (trap_trap='1' AND decodeOPC='1') THEN		--fetchOPC für Trap
+				ELSIF writePC='1' OR fetchOPC='1' OR interrupt='1' OR (trap_trap='1' AND decodeOPC='1') THEN		--fetchOPC fï¿½r Trap
 					data_write_tmp <= TG68_PC;
-				ELSIF execOPC='1' OR (get_ea_now='1' AND ea_only='1') THEN		--get_ea_now='1' AND ea_only='1' ist für pea
+				ELSIF execOPC='1' OR (get_ea_now='1' AND ea_only='1') THEN		--get_ea_now='1' AND ea_only='1' ist fï¿½r pea
 					data_write_tmp <= registerin(31 downto 8)&(registerin(7)OR exec_tas)&registerin(6 downto 0);
 				ELSIF (exec_DIRECT='1' AND state="10") OR direct_data='1' THEN
 					data_write_tmp <= data_read;
@@ -1145,13 +1145,6 @@ PROCESS (clk, reset, opcode)
 				IF directCCR='1' THEN
 					Flags(7 downto 0) <= data_read(7 downto 0);
 				END IF;	
-				IF interrupt='1' THEN
-					Flags(10 downto 8) <=rIPL_nr;
-					SVmode <= '1';
-				END IF;	
-				IF writeSR='1' OR interrupt='1' THEN
-					Flags(13) <='1';
-				END IF;	
 				IF endOPC='1' AND to_SR='0' THEN
 					SVmode <= Flags(13);
 				END IF;
@@ -1195,6 +1188,13 @@ PROCESS (clk, reset, opcode)
 					ELSIF exec_bits='1' THEN
 						Flags(2) <= NOT one_bit_in;				 	
 					END IF;
+				END IF;	
+				IF interrupt='1' THEN		--move puu
+					Flags(10 downto 8) <=rIPL_nr;
+					SVmode <= '1';
+				END IF;	
+				IF writeSR='1' OR interrupt='1' THEN
+					Flags(13) <='1';
 				END IF;	
 			END IF;	
 		END IF;	
@@ -1306,6 +1306,7 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 
 		trap_chk <= '0';
 		next_micro_state <= idle;
+		datatype<="11";
 
 ------------------------------------------------------------------------------
 --Sourcepass
@@ -1937,7 +1938,7 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 										datatype <= "10";
 										IF decodeOPC='1' THEN
 											next_micro_state <= link;
-											set_exec_MOVE <= '1';						--für displacement
+											set_exec_MOVE <= '1';						--fï¿½r displacement
 											presub <= '1';
 											setstackaddr <='1';
 											set_mem_addsub <= '1';
@@ -2501,7 +2502,7 @@ PROCESS (clk, reset, OP2out, opcode, fetchOPC, decodeOPC, execOPC, endOPC, nextp
 --PROCESS (micro_state)
 --	BEGIN
 		IF Z_error='1'  THEN		-- divu by zero
-			trapmake <= '1';			--wichtig für USP
+			trapmake <= '1';			--wichtig fï¿½r USP
 			IF trapd='0' THEN
 				writePC <= '1';
 			END IF;			
