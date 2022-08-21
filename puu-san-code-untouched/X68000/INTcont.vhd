@@ -4,7 +4,7 @@ use	IEEE.std_logic_unsigned.all;
 
 entity INTcont is
 generic(
-	INText	:integer	:=3
+	INText	:integer	:=2
 );
 port(
 	int7	:in std_logic	:='0';
