@@ -10,7 +10,7 @@ generic(
 	FCFREQ		:integer	:=30000;		--FDC clock
 	ACFREQ		:integer	:=32000;		--Audio clock
 	DACFREQ		:integer	:=16000;		--Audio DAC freq
-	DEBUG			:std_logic_vector(7 downto 0)	:="00000000"	--nop,SPRBGONOFF,OPMCH_ONOFF,PAUSE_ONOFF,GRP_ONOFF,SCR_ONOFF,ADPCM_ONOFF,CYCLERESET
+	DEBUG			:std_logic_vector(7 downto 0)	:="00000000"	--nop,SPRBGONOFF,OPMCH_ONOFF,PAUSE_ONOFF,GRP_ONOFF,SCR_ONOFF,nop,CYCLERESET
 );
 port(
 	ramclk	:in std_logic;
@@ -115,7 +115,7 @@ constant brsize		:integer	:=7;
 constant RAMAWIDTH	:integer	:=25;	--per byte
 
 constant DBIT_CYCLERESET	:integer	:=0;
-constant DBIT_ADPCM_ONOFF	:integer	:=1;
+--constant DBIT_ADPCM_ONOFF	:integer	:=1;
 constant DBIT_SCR_ONOFF		:integer	:=2;
 constant DBIT_GRP_ONOFF		:integer	:=3;
 constant DBIT_PAUSE_ONOFF	:integer	:=4;
@@ -2245,8 +2245,8 @@ begin
 		pclo2	=>open,
 		doneo2	=>open,
 
---		drq3	=>pcm_drq,
-		drq3	=>pcm_drq and ((not pDip(2)) or (not DEBUG(DBIT_ADPCM_ONOFF))),
+		drq3	=>pcm_drq,
+--		drq3	=>pcm_drq and ((not pDip(2)) or (not DEBUG(DBIT_ADPCM_ONOFF))),
 		dack3	=>open,
 		pcli3	=>pcm_drq,
 		pclo3	=>open,

@@ -29,22 +29,22 @@ end envcont;
 architecture rtl of envcont is
 signal	SLEVEL	:std_logic_vector(totalwidth downto 0);
 signal	RATE	:std_logic_vector(5 downto 0);
-signal	RSEL	:std_logic_vector(5 downto 0);
+signal	RSEL	:std_logic_vector(6 downto 0);
 signal	DELTA	:std_logic_vector(totalwidth-1 downto 0);
 begin
 	
 	SLEVEL(totalwidth downto totalwidth-16)<='0' & SLlevel;
 	SLEVEL(totalwidth-17 downto 0)<=(others=>'1');
 	
-	RSEL<=	AR & '0'	when CURSTATE=es_Atk else
-			DR & '0'	when CURSTATE=es_Dec else
-			SR & '0'	when CURSTATE=es_Sus else
-			RR & "00";
+	RSEL<=	('0' & AR & '0') +"0010000"	when CURSTATE=es_Atk else
+				'0' & DR & '0'	when CURSTATE=es_Dec else
+				'0' & SR & '0'	when CURSTATE=es_Sus else
+				'0' & RR & "00";
 	
 	process(RSEL,RKS)
 	variable tmp	:std_logic_vector(6 downto 0);
 	begin
-		tmp:=('0' & RSEL)+("00" & RKS);
+		tmp:=RSEL+("00" & RKS);
 		if(tmp(6)='1')then
 			tmp(6):='0';
 			tmp(5 downto 0):=(others=>'1');
